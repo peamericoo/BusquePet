@@ -1,58 +1,44 @@
-<div align="center">
+# BusquePet
 
-<img src="assets/readme-banner.svg" alt="BusquePet. A foto entra. O sistema procura o animal." width="100%">
+<p align="center">
+  <img src="assets/demo.gif" alt="Uma foto entra, a busca passa de pending para completed e devolve dois candidatos." width="720">
+</p>
 
-Uma pessoa manda a foto de um animal perdido. Eu quero devolver candidatos parecidos, rápido, sem transformar isso num grupo de Facebook.
+Uma foto de animal perdido entra. A API em Go guarda, tira um pHash e manda o trabalho para a fila. O Python compara com o índice. O websocket avisa quando acabou.
 
-</div>
+Não é rede social. É o cano entre a foto e um "achei uns parecidos".
 
-## O que é
+## Como a foto anda
 
-BusquePet é o meu sistema para reencontrar animal por imagem. A porta da frente é uma API em Go. A comparação pesada fica no Python. No meio tem fila, cache e um websocket, porque ninguém merece ficar atualizando a página para saber se a busca acabou.
+1. `POST /v1/ingest`, campo `image`.
+2. A resposta traz `job_id`, `status` e `phash`.
+3. O NATS chama o webhook Python em `POST /v1/match`.
+4. O resultado fica no Redis e sai em `/v1/ws`, ou em `GET /v1/jobs/{job_id}`.
 
-A ideia é simples: a foto chega, eu calculo um pHash, mando o trabalho para a fila, o modelo compara com o índice, e o resultado volta para quem está esperando.
+## Do que é feito
 
-## Para que serve
+Go 1.22 na porta: Chi, Redis, NATS e websocket. Python no miolo: PyTorch, Transformers, PEFT, FAISS e pHash. Tem um ViT treinado em cima do Oxford-IIIT Pet. O front desta pasta é HTML, em `frontend/`. Sem framework.
 
-- Receber a foto de um animal e não perder o pedido no caminho.
-- Comparar essa foto com um índice já treinado, usando hash perceptual e embedding.
-- Avisar na hora quando a busca sai de "recebi" para "terminei".
-- Deixar o treino do modelo separado da API que atende gente.
+## Subir
 
-## Stack
-
-| Camada | O que eu usei |
-| --- | --- |
-| API | Go 1.22, Chi, WebSocket |
-| Fila e cache | NATS e Redis |
-| Visão | Python, PyTorch, Transformers, PEFT, FAISS, pHash |
-| Treino | ViT em cima do Oxford-IIIT Pet, treino contrastivo e LoRA |
-| Entrega | FastAPI no webhook de matching, Docker Compose |
-| Front | HTML, CSS e JavaScript. Direto, sem framework |
-
-O front desta versão é uma página simples. Quem faz o trabalho é o pipeline.
-
-## Como rodar
-
-Precisa de Python 3.11, Go 1.22 ou mais novo, e os modelos já gerados. Sem o índice do FAISS e sem o checkpoint, a API sobe e a busca não tem com o que comparar.
-
-Sobe a infra e os dois serviços:
+Python 3.11, Go 1.22, e os arquivos de modelo na mão. Sem o checkpoint e sem o índice do FAISS, a API sobe e a busca não tem com o que comparar.
 
 ```bash
 mkdir -p shared-storage models data
 docker compose up --build
 ```
 
-Fica assim:
-
 | Serviço | Onde |
 | --- | --- |
 | API Go | http://localhost:8080 |
 | Webhook Python | http://localhost:8001 |
 | Redis | localhost:6379 |
-| NATS | localhost:4222, painel em 8222 |
+| NATS | localhost:4222, painel na 8222 |
 
-Se for rodar na mão, o webhook primeiro:
+<details>
+<summary>Rodar na mão, sem Docker</summary>
+
+Webhook:
 
 ```bash
 export BUSQUEPET_MODEL_PATH=models/contrastive/best_model.pt
@@ -62,7 +48,7 @@ export BUSQUEPET_WEBHOOK_PORT=8001
 python3 -m uvicorn src.webhook_service:app --host 0.0.0.0 --port 8001
 ```
 
-Depois a API:
+API:
 
 ```bash
 export BUSQUEPET_STORAGE_DIR=$PWD/shared-storage
@@ -72,34 +58,21 @@ export BUSQUEPET_PYTHON_WEBHOOK_URL=http://127.0.0.1:8001/v1/match
 cd busquepet-go && go run ./cmd/busquepet-api
 ```
 
-Manda a foto em `POST /v1/ingest`, no campo `image`. O retorno traz `job_id`, `status` e `phash`. O andamento está em `GET /v1/jobs/{job_id}` ou no websocket `/v1/ws`.
+</details>
 
-## O que tem aqui
+## Onde mexer
 
-| Pasta | Função |
-| --- | --- |
-| `busquepet-go/` | Recebe upload, normaliza a imagem, calcula pHash, guarda status no Redis, publica no NATS e empurra o resultado no websocket |
-| `src/` | Treino, embeddings, índice FAISS e o webhook que devolve os matches |
-| `frontend/` | A página para experimentar |
-| `configs/` | Config de treino e de inferência |
-| `docs/` | Pipeline, treino e o diagrama |
-| `deployments/` | Imagem do webhook Python |
+- `busquepet-go/` recebe a foto, normaliza, publica no NATS e empurra o status no websocket.
+- `src/` treina, monta o índice e responde o match.
+- `docs/PIPELINE.md` e `docs/TRAINING_GUIDE.md` ficam para quando for treinar de novo.
 
-O contrato do match está em `POST /v1/match`. Entra o caminho da imagem já normalizada, o pHash e o `job_id`. Sai uma lista ranqueada com raça, score e distância.
-
-Mais detalhe de treino e de pipeline: [docs/PIPELINE.md](docs/PIPELINE.md) e [docs/TRAINING_GUIDE.md](docs/TRAINING_GUIDE.md).
-
-## Estado atual
-
-O caminho de ingestão até o match está desenhado e ligado no Compose. A qualidade da busca depende do modelo e do índice que você colocar em `models/` e `data/`. Isso não vem versionado pronto para produção.
-
-Para um teste seco, sem foto:
+Teste seco, sem foto:
 
 ```bash
 cd busquepet-go && go test ./...
 python3 -m py_compile src/webhook_service.py
 ```
 
----
+O fluxo está ligado no Compose. Modelo e índice não vêm neste git.
 
-Pedro Américo Paletot. Conta [peamericoo](https://github.com/peamericoo).
+Pedro Américo Paletot, [peamericoo](https://github.com/peamericoo).
