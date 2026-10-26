@@ -56,7 +56,11 @@ const renderResults = (result) => {
     const apiBase = apiBaseInput.value.trim().replace(/\/$/, "");
     const rawPath = match.image_path || "";
     const normalizedPath = rawPath.replace(/^\/+/, "");
-    const imgSrc = rawPath ? `${apiBase}/files/${normalizedPath}` : "";
+    const imgSrc = rawPath.startsWith("demo/")
+      ? rawPath
+      : rawPath
+        ? `${apiBase}/files/${normalizedPath}`
+        : "";
     card.innerHTML = `
       <div class="result-meta">
         <strong>#${index + 1} ${match.breed ?? "-"}</strong>
@@ -226,6 +230,13 @@ refreshBtn.addEventListener("click", handleRefreshJob);
 connectBtn.addEventListener("click", connectWebSocket);
 disconnectBtn.addEventListener("click", () => websocket?.close());
 
-// Inicializa UI vazia
-renderResults();
-log("Console carregado. Configure os endpoints e conecte o WebSocket.");
+const exemplo = {
+  matches: [
+    { breed: "vira-lata", score: 0.94, image_id: "thor-01", image_path: "demo/thor.jpg" },
+    { breed: "sem raça definida", score: 0.81, image_id: "luna-02", image_path: "demo/luna.jpg" },
+  ],
+};
+renderResults(exemplo);
+if (jobIdInput) jobIdInput.value = "8f2a";
+if (latencyInput) latencyInput.value = "184";
+log("Exemplo carregado. Manda uma foto de verdade para substituir.");

@@ -4,7 +4,7 @@
 
 ## A tela
 
-O console aberto de verdade, servido da pasta `frontend`. O websocket aparece desconectado porque a API Go não estava no ar. A tela é essa.
+O console aberto de verdade, servido da pasta `frontend`. Ele já entra com dois matches de exemplo, Thor e Luna, para não abrir vazio. O websocket aparece desconectado porque a API Go não estava no ar.
 
 <p align="center">
   <img src="assets/tela.png" alt="Console do BusquePet aberto, com upload à esquerda e o painel de matching à direita." width="820">
