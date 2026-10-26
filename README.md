@@ -1,7 +1,5 @@
-# BusquePet
-
 <p align="center">
-  <img src="assets/demo.gif" alt="Uma foto entra, a busca passa de pending para completed e devolve dois candidatos." width="720">
+  <img src="assets/demo.gif" alt="BusquePet. Uma foto entra, a busca passa de pending para completed e devolve dois candidatos." width="820">
 </p>
 
 Uma foto de animal perdido entra. A API em Go guarda, tira um pHash e manda o trabalho para a fila. O Python compara com o índice. O websocket avisa quando acabou.
