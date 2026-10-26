@@ -2,6 +2,14 @@
   <img src="assets/demo.gif" alt="BusquePet. Uma foto entra, a busca passa de pending para completed e devolve dois candidatos." width="820">
 </p>
 
+## A tela
+
+O console aberto de verdade, servido da pasta `frontend`. O websocket aparece desconectado porque a API Go não estava no ar. A tela é essa.
+
+<p align="center">
+  <img src="assets/tela.png" alt="Console do BusquePet aberto, com upload à esquerda e o painel de matching à direita." width="820">
+</p>
+
 Uma foto de animal perdido entra. A API em Go guarda, tira um pHash e manda o trabalho para a fila. O Python compara com o índice. O websocket avisa quando acabou.
 
 Não é rede social. É o cano entre a foto e um "achei uns parecidos".
