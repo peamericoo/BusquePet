@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-label="BusquePet">
+  <rect width="1200" height="360" fill="#101218"/>
+  <rect width="14" height="360" fill="#2ec4b6"/>
+  <g fill="#2ec4b6" opacity="0.28">
+    <circle cx="1040" cy="78" r="4"/>
+    <circle cx="1072" cy="78" r="4"/>
+    <circle cx="1104" cy="78" r="4"/>
+    <circle cx="1040" cy="110" r="4"/>
+    <circle cx="1072" cy="110" r="4"/>
+    <circle cx="1104" cy="110" r="4"/>
+    <circle cx="1040" cy="142" r="4"/>
+    <circle cx="1072" cy="142" r="4"/>
+    <circle cx="1104" cy="142" r="4"/>
+  </g>
+  <text x="72" y="132" fill="#2ec4b6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" letter-spacing="3.5">ACHAR PET POR FOTO</text>
+  <text x="72" y="214" fill="#f4f1ea" font-family="Georgia, 'Iowan Old Style', 'Palatino Linotype', serif" font-size="78">BusquePet</text>
+  <text x="72" y="268" fill="#c4beb4" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26">A foto entra. O sistema procura o animal.</text>
+  <text x="72" y="322" fill="#6f6a62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">peamericoo</text>
+</svg>
